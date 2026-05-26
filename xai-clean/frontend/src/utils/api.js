@@ -1,35 +1,51 @@
+// utils/api.js
 import axios from 'axios'
 
+// Base URL from environment variable
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  headers: { 'Content-Type': 'application/json' }
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  timeout: 15000
 })
 
-// Attach JWT token
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('xai_token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
+// Attach JWT token automatically
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('xai_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
 
-// Auto logout on 401
+// Handle responses globally
 api.interceptors.response.use(
-  res => res,
-  err => {
-    if (err.response?.status === 401) {
+  (response) => response,
+  (error) => {
+    // 🔥 SHOW REAL ERROR (important for debugging)
+    console.error("API ERROR:", error.response?.data || error.message)
+
+    if (error.response?.status === 401) {
       localStorage.removeItem('xai_token')
       window.location.href = '/login'
     }
-    return Promise.reject(err)
+
+    return Promise.reject(error)
   }
 )
 
-// Auth
-export const login = (data)  => api.post('/auth/login', data)
-export const signup = (data) => api.post('/auth/signup', data)
-export const getMe = ()      => api.get('/auth/me')
 
-// Upload
+// ---------------- AUTH ----------------
+export const login = (data) => api.post('/auth/login', data)
+export const signup = (data) => api.post('/auth/signup', data)
+export const getMe = () => api.get('/auth/me')
+
+
+// ---------------- UPLOAD ----------------
 export const uploadCSV = (formData) =>
   api.post('/upload-csv', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
@@ -37,22 +53,29 @@ export const uploadCSV = (formData) =>
 
 export const getUploads = () => api.get('/uploads')
 
-// Train
+
+// ---------------- TRAIN ----------------
 export const trainModel = (body) => api.post('/train-model', body)
 export const getTrainingLogs = () => api.get('/training-logs')
 
-// Predict
-export const predict = (body)       => api.post('/predict', body)
-export const predictBatch = (body)  => api.post('/predict-batch', body)
-export const getPredictions = ()    => api.get('/predictions')
+
+// ---------------- PREDICT ----------------
+export const predict = (body) => api.post('/predict', body)
+export const predictBatch = (body) => api.post('/predict-batch', body)
+export const getPredictions = () => api.get('/predictions')
 export const getDashboardStats = () => api.get('/dashboard-stats')
 
-// Explain
-export const getLimeExplanation = (body) => api.post('/get-explanation', body)
+
+// ---------------- EXPLAIN ----------------
+export const getLimeExplanation = (body) =>
+  api.post('/get-explanation', body)
+
 export const getShapGlobal = (model, samples = 100) =>
   api.get(`/shap-global?model=${model}&samples=${samples}`)
 
 export const getPlotUrl = (filename) =>
   `${import.meta.env.VITE_API_URL}/plots/${filename}`
 
+
+// Export instance
 export default api
