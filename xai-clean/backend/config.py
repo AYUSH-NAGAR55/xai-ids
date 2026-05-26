@@ -11,13 +11,18 @@ class Config:
     # Flask secret key
     SECRET_KEY = os.getenv("SECRET_KEY", "xai-ids-secret-2024")
 
-    # MySQL Database URI
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL",
-        "mysql+pymysql://root:password@localhost/xai_ids"
-    )
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+   
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
 
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+SQLALCHEMY_ENGINE_OPTIONS = {
+    "pool_pre_ping": True,
+    "pool_recycle": 280,
+    "connect_args": {
+        "connect_timeout": 30
+    }
+}
     # JWT settings
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "jwt-secret-xai-2024")
     JWT_ACCESS_TOKEN_EXPIRES = 86400  # 24 hours
