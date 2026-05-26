@@ -6,7 +6,6 @@ XAI-based Intrusion Detection System
 import os
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
 
 from extensions import db, jwt
 from config import DevelopmentConfig
@@ -49,8 +48,10 @@ def create_app():
     app.register_blueprint(predict_bp, url_prefix="/api")
     app.register_blueprint(explain_bp, url_prefix="/api")
 
-    # ❌ IMPORTANT: DO NOT use db.create_all() in Railway
-    # Tables should be created using schema.sql OR migrations
+    # ✅ ADD THIS (VERY IMPORTANT)
+    @app.route("/")
+    def home():
+        return "🚀 XAI-IDS Backend is running successfully"
 
     return app
 
