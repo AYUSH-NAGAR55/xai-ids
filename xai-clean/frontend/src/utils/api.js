@@ -1,19 +1,18 @@
-// utils/api.js - Centralized API calls to Flask backend
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL,
   headers: { 'Content-Type': 'application/json' }
 })
 
-// Attach JWT token to every request automatically
+// Attach JWT token
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('xai_token')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
-// Auto-logout on 401
+// Auto logout on 401
 api.interceptors.response.use(
   res => res,
   err => {
@@ -25,30 +24,35 @@ api.interceptors.response.use(
   }
 )
 
-// ---- Auth ----
+// Auth
 export const login = (data)  => api.post('/auth/login', data)
 export const signup = (data) => api.post('/auth/signup', data)
 export const getMe = ()      => api.get('/auth/me')
 
-// ---- Upload ----
+// Upload
 export const uploadCSV = (formData) =>
-  api.post('/upload-csv', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+  api.post('/upload-csv', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+
 export const getUploads = () => api.get('/uploads')
 
-// ---- Train ----
+// Train
 export const trainModel = (body) => api.post('/train-model', body)
 export const getTrainingLogs = () => api.get('/training-logs')
 
-// ---- Predict ----
+// Predict
 export const predict = (body)       => api.post('/predict', body)
 export const predictBatch = (body)  => api.post('/predict-batch', body)
 export const getPredictions = ()    => api.get('/predictions')
 export const getDashboardStats = () => api.get('/dashboard-stats')
 
-// ---- Explain ----
+// Explain
 export const getLimeExplanation = (body) => api.post('/get-explanation', body)
 export const getShapGlobal = (model, samples = 100) =>
   api.get(`/shap-global?model=${model}&samples=${samples}`)
-export const getPlotUrl = (filename) => `/api/plots/${filename}`
+
+export const getPlotUrl = (filename) =>
+  `${import.meta.env.VITE_API_URL}/plots/${filename}`
 
 export default api
