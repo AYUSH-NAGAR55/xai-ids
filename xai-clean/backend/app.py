@@ -23,7 +23,7 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
 
-    # Enable CORS for frontend
+    # Enable CORS for frontend (add your Vercel URL later)
     CORS(
         app,
         resources={r"/api/*": {
@@ -48,7 +48,7 @@ def create_app():
     app.register_blueprint(predict_bp, url_prefix="/api")
     app.register_blueprint(explain_bp, url_prefix="/api")
 
-    # ✅ ADD THIS (VERY IMPORTANT)
+    # ✅ Home route
     @app.route("/")
     def home():
         return "🚀 XAI-IDS Backend is running successfully"
@@ -56,8 +56,11 @@ def create_app():
     return app
 
 
-# Entry point for local development
+# ✅ IMPORTANT: Global app instance for Gunicorn (Railway)
+app = create_app()
+
+
+# Local development run
 if __name__ == "__main__":
-    app = create_app()
     print("🚀 XAI-IDS Backend running on http://localhost:5000")
     app.run(debug=True, host="0.0.0.0", port=5000)
