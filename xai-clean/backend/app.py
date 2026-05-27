@@ -8,37 +8,40 @@ from flask import Flask
 from flask_cors import CORS
 
 from extensions import db, jwt
-from config import DevelopmentConfig
+from config import ProductionConfig   # ✅ use ProductionConfig on Railway
 
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(DevelopmentConfig)
 
-    # Create folders safely
+    # ✅ Load production config
+    app.config.from_object(ProductionConfig)
+
+    # ✅ Ensure folders exist
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     os.makedirs(app.config["MODEL_FOLDER"], exist_ok=True)
 
-    # Initialize extensions
+    # ✅ Initialize extensions
     db.init_app(app)
     jwt.init_app(app)
 
-    # Enable CORS for frontend (add your Vercel URL later)
+    # ✅ CORS (VERY IMPORTANT for Vercel)
     CORS(
-    app,
-    resources={r"/api/*": {
-        "origins": [
-            "http://localhost:5173",
-            "http://localhost:3000",
-            "https://xai-ids.vercel.app",
-            "https://xai-ids-livid.vercel.app",
-            "https://*.vercel.app"
-        ]
-    }},
-    supports_credentials=True
-)
+        app,
+        resources={
+            r"/api/*": {
+                "origins": [
+                    "http://localhost:5173",
+                    "http://localhost:3000",
+                    "https://xai-ids.vercel.app",
+                    "https://xai-ids-livid.vercel.app",
+                ]
+            }
+        },
+        supports_credentials=True
+    )
 
-    # Import and register blueprints
+    # ✅ Register blueprints
     from routes.auth import auth_bp
     from routes.upload import upload_bp
     from routes.train import train_bp
@@ -51,7 +54,7 @@ def create_app():
     app.register_blueprint(predict_bp, url_prefix="/api")
     app.register_blueprint(explain_bp, url_prefix="/api")
 
-    # ✅ Home route
+    # ✅ Health route (important for testing)
     @app.route("/")
     def home():
         return "🚀 XAI-IDS Backend is running successfully"
@@ -59,11 +62,11 @@ def create_app():
     return app
 
 
-# ✅ IMPORTANT: Global app instance for Gunicorn (Railway)
+# ✅ REQUIRED for Railway (Gunicorn)
 app = create_app()
 
 
-# Local development run
+# ✅ Local run
 if __name__ == "__main__":
-    print("🚀 XAI-IDS Backend running on http://localhost:5000")
+    print("🚀 Running locally on http://localhost:5000")
     app.run(debug=True, host="0.0.0.0", port=5000)
