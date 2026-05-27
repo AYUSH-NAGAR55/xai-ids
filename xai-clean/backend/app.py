@@ -31,7 +31,8 @@ def create_app():
             "http://localhost:5173",
             "http://localhost:3000",
             "https://xai-ids.vercel.app",
-            "https://xai-ids-livid.vercel.app"
+            "https://xai-ids-livid.vercel.app",
+            "https://*.vercel.app"
         ]
     }},
     supports_credentials=True
