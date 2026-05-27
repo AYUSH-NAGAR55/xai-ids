@@ -25,15 +25,17 @@ def create_app():
 
     # Enable CORS for frontend (add your Vercel URL later)
     CORS(
-        app,
-        resources={r"/api/*": {
-            "origins": [
-                "http://localhost:5173",
-                "http://localhost:3000"
-            ]
-        }},
-        supports_credentials=True
-    )
+    app,
+    resources={r"/api/*": {
+        "origins": [
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "https://xai-ids.vercel.app",
+            "https://xai-ids-livid.vercel.app"
+        ]
+    }},
+    supports_credentials=True
+)
 
     # Import and register blueprints
     from routes.auth import auth_bp
