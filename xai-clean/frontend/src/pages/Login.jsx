@@ -31,9 +31,17 @@ export default function Login() {
         toast.success('Account created! Please login.')
         setIsLogin(true)
       }
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Something went wrong')
-    } finally {
+    }catch (err) {
+  console.log("ERROR:", err)
+
+  const msg =
+    err.response?.data?.error ||
+    err.response?.data?.message ||
+    JSON.stringify(err.response?.data) ||
+    err.message
+
+  toast.error(msg)
+}finally {
       setLoading(false)
     }
   }
