@@ -8,13 +8,13 @@ from flask import Flask
 from flask_cors import CORS
 
 from extensions import db, jwt
-from config import ProductionConfig   # ✅ use ProductionConfig on Railway
+from config import ProductionConfig   # ✅ Production config
 
 
 def create_app():
     app = Flask(__name__)
 
-    # ✅ Load production config
+    # ✅ Load config
     app.config.from_object(ProductionConfig)
 
     # ✅ Ensure folders exist
@@ -25,7 +25,7 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
 
-    # ✅ CORS (VERY IMPORTANT for Vercel)
+    # ✅ CORS (FIXED PROPERLY)
     CORS(
         app,
         resources={
@@ -34,7 +34,7 @@ def create_app():
                     "http://localhost:5173",
                     "http://localhost:3000",
                     "https://xai-ids.vercel.app",
-                    "https://xai-ids-livid.vercel.app",
+                    "https://xai-ids-livid.vercel.app"
                 ]
             }
         },
@@ -54,7 +54,11 @@ def create_app():
     app.register_blueprint(predict_bp, url_prefix="/api")
     app.register_blueprint(explain_bp, url_prefix="/api")
 
-    # ✅ Health route (important for testing)
+    # ✅ AUTO CREATE TABLES (🔥 VERY IMPORTANT FIX)
+    with app.app_context():
+        db.create_all()
+
+    # ✅ Health route
     @app.route("/")
     def home():
         return "🚀 XAI-IDS Backend is running successfully"
@@ -62,7 +66,7 @@ def create_app():
     return app
 
 
-# ✅ REQUIRED for Railway (Gunicorn)
+# ✅ Required for Railway (Gunicorn)
 app = create_app()
 
 
